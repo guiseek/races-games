@@ -245,6 +245,7 @@ web_modules/
 # Next.js build output
 .next
 blend
+tmp
 out
 
 # Nuxt.js build / generate output
