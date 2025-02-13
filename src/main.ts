@@ -15,9 +15,7 @@ setup().then(async () => {
     stage.scene.add(object)
   })
 
-  track.objects.forEach((object) => {
-    stage.scene.add(object)
-  })
+  stage.scene.add(track.object)
 
   stage.scene.add(track.startLights.object)
 
@@ -28,23 +26,29 @@ setup().then(async () => {
 
     const vehicle = await provideVehicle(RED_BULL_RB9)
 
-    const {x, y, z} = track.positions[3].position
+    const {x, y, z} = track.positions[2].position
     vehicle.body.position.set(x - 5, y, z)
-    vehicle.body.quaternion.setFromEuler(0, track.rotate, 0)
+    vehicle.body.quaternion.setFromEuler(0, track.settings.rotate, 0)
 
     stage.camera.position.set(0, 0.9, -0.2)
     stage.camera.lookAt(0, 1, 16)
 
     vehicle.object.add(stage.camera)
-    vehicle.body.quaternion.setFromEuler(0, track.rotate, 0)
 
     vehicle.raycast.addToWorld(stage.world)
-    vehicle.wheels.forEach(({object}) => {
-      stage.scene.add(object)
-    })
 
-    stage.scene.add(vehicle.object)
-    stage.addUpdatable(vehicle)
+    track.addVehicle(vehicle)
+
+    stage.addUpdatable(track)
+
+    // stage.controls.setTarget(vehicle.object)
+
+    // vehicle.wheels.forEach(({object}) => {
+    //   stage.scene.add(object)
+    // })
+
+    // stage.scene.add(vehicle.object)
+    // stage.addUpdatable(vehicle)
 
     stage.animate()
 

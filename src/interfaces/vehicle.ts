@@ -8,6 +8,7 @@ export type VehiclePart =
   | 'ChassisBody'
   | 'FrontSuspension'
   | 'RearSuspension'
+  | 'CollisionFrontWing'
   | 'CollisionFrontWheelLeft'
   | 'FrontWheelLeft'
   | 'CollisionFrontWheelRight'
@@ -32,18 +33,25 @@ export interface VehicleGear {
 }
 
 export interface VehicleSettings {
+  readonly mass: number
   readonly rpm: number
   readonly force: number
   readonly steer: number
   readonly brake: number
+  readonly downforce: number
   readonly gears: VehicleGear[]
+}
+
+export interface VehicleDashboardConfig {
+  speed: VehicleInfoConfig
+  gear: VehicleInfoConfig
 }
 
 export interface VehicleConfig {
   model: string
   sound: string
   font: string
-  info: VehicleInfoConfig
+  dashboard: VehicleDashboardConfig
   pointLocalY: number
   settings: VehicleSettings
 }

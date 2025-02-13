@@ -1,5 +1,5 @@
-import {getBoundingSphere, toQuaternion, toTrimesh, toVec3} from '../../utils'
 import {VehiclePart, VehicleSettings} from '../../interfaces'
+import {VehicleDashboard} from './vehicle-dashboard'
 import {GLTF} from 'three/examples/jsm/Addons.js'
 import {lerp} from 'three/src/math/MathUtils.js'
 import {VehicleActions} from './vehicle-actions'
@@ -8,8 +8,15 @@ import {VehicleWheel} from './vehicle-wheel'
 import {Group, Mesh, Object3D} from 'three'
 import {VehicleState} from './vehicle-state'
 import {VehicleSound} from './vehicle-sound'
-import {VehicleInfo} from './vehicle-info'
 import {Parts} from '../../core'
+import {
+  toVec3,
+  getArea,
+  toTrimesh,
+  toQuaternion,
+  getBoundingSphere,
+  calculateDownforce,
+} from '../../utils'
 
 export class Vehicle {
   parts: Parts<VehiclePart>
@@ -33,42 +40,50 @@ export class Vehicle {
 
   steeringWheel: Object3D
 
+  chassis: Mesh
+
+  frontWingArea: number
+
   maxSpeed: number
 
   constructor(
     {scene}: GLTF,
     private sound: VehicleSound,
-    private info: VehicleInfo,
+    private dashboard: VehicleDashboard,
     private settings: VehicleSettings
   ) {
     this.parts = new Parts(scene)
 
     this.actions = new VehicleActions()
 
-    this.body = new Body({mass: 540})
+    this.body = new Body({mass: settings.mass})
     this.body.collisionResponse = true
     this.body.updateMassProperties()
 
     this.steeringWheel = this.parts.getPart('SteeringWheel')
 
-    const chassisBody = this.parts.getPart<Mesh>('CollisionChassisBody')
+    this.chassis = this.parts.getPart<Mesh>('CollisionChassisBody')
+
+    const frontWing = this.parts.getPart<Mesh>('CollisionFrontWing')
+
+    this.frontWingArea = getArea(frontWing)
 
     this.body.position.set(
-      chassisBody.position.x,
-      chassisBody.position.y,
-      chassisBody.position.z
+      this.chassis.position.x,
+      this.chassis.position.y,
+      this.chassis.position.z
     )
 
     this.body.quaternion.set(
-      chassisBody.quaternion.x,
-      chassisBody.quaternion.y,
-      chassisBody.quaternion.z,
-      chassisBody.quaternion.w
+      this.chassis.quaternion.x,
+      this.chassis.quaternion.y,
+      this.chassis.quaternion.z,
+      this.chassis.quaternion.w
     )
 
-    const shape = toTrimesh(chassisBody.geometry)
-    const offset = toVec3(chassisBody.position)
-    const orientation = toQuaternion(chassisBody.quaternion)
+    const shape = toTrimesh(this.chassis.geometry)
+    const offset = toVec3(this.chassis.position)
+    const orientation = toQuaternion(this.chassis.quaternion)
     this.body.addShape(shape, offset, orientation)
 
     this.raycast = new RaycastVehicle({
@@ -85,7 +100,7 @@ export class Vehicle {
       this.parts.getPart('RearSuspension')
     )
 
-    this.object.add(this.info)
+    this.object.add(this.dashboard.gear, this.dashboard.speed)
 
     this.state = new VehicleState(0, 1, 800)
 
@@ -95,14 +110,14 @@ export class Vehicle {
       const collision = this.parts.getPart<Mesh>('CollisionFrontWheelLeft')
       const wheel = this.parts.getPart('FrontWheelLeft')
       const radius = collision.geometry.boundingSphere!.radius
-      this.addWheel(collision, wheel, radius * 1.5)
+      this.addWheel(collision, wheel, radius * 1.5, true)
     }
 
     {
       const collision = this.parts.getPart<Mesh>('CollisionFrontWheelRight')
       const wheel = this.parts.getPart('FrontWheelRight')
       const radius = collision.geometry.boundingSphere!.radius
-      this.addWheel(collision, wheel, radius * 1.5)
+      this.addWheel(collision, wheel, radius * 1.5, true)
     }
 
     {
@@ -120,6 +135,15 @@ export class Vehicle {
     }
 
     this.listen()
+  }
+
+  determineDownforce(airDensity: number) {
+    return calculateDownforce(
+      this.body.velocity.length(),
+      this.settings.downforce,
+      this.frontWingArea,
+      airDensity
+    )
   }
 
   update(deltaTime: number) {
@@ -182,8 +206,12 @@ export class Vehicle {
       this.state.shiftDown()
     }
 
-    /** Gear on display */
-    this.info.update(this.state.gear)
+    {
+      this.dashboard.update(
+        this.state.gear,
+        Math.max(0, this.raycast.currentVehicleSpeedKmHour)
+      )
+    }
 
     /**
      * Sound
@@ -216,9 +244,14 @@ export class Vehicle {
     }
   }
 
-  protected addWheel(collision: Mesh, object: Object3D, pointLocalY: number) {
+  protected addWheel(
+    collision: Mesh,
+    object: Object3D,
+    pointLocalY: number,
+    isFrontWheel = false
+  ) {
     const {radius} = getBoundingSphere(collision.geometry)
-    const wheel = new VehicleWheel(radius, object, pointLocalY)
+    const wheel = new VehicleWheel(radius, object, isFrontWheel, pointLocalY)
     this.raycast.addWheel(wheel)
     this.wheels.push(wheel)
   }

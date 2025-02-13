@@ -40,8 +40,10 @@ export abstract class Actions<T extends string> {
     return (event: KeyboardEvent) => {
       const action = this.#normalizeAction(event.code)
       if (this.#isAction(action)) {
-        event.preventDefault()
         const meta = this.#getMeta(event)
+        if (!meta.meta) {
+          event.preventDefault()
+        }
         const listeners = this.#getListeners(action)
         for (const cb of listeners) cb(state, meta)
         this.state[action] = state

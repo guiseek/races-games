@@ -4,15 +4,24 @@ export const MCLAREN_MP4_5: VehicleConfig = {
   model: 'mclaren-mp4-5',
   sound: 'mclaren.wav',
   font: 'seven-segment-regular.typeface.json',
-  info: {
-    color: 0x181818,
-    position: {x: -0.02, y: 0.7356, z: 0.4},
-    size: 0.008,
+  dashboard: {
+    gear: {
+      color: 0x181818,
+      position: {x: -0.02, y: 0.7356, z: 0.4},
+      size: 0.008,
+    },
+    speed: {
+      color: 0x181818,
+      position: {x: -0.02, y: 0.7356, z: 0.4},
+      size: 0.008,
+    },
   },
   pointLocalY: 0,
   settings: {
+    mass: 540,
     rpm: 7000,
     force: 3200,
+    downforce: 0.7,
     steer: 0.3,
     brake: 800,
     gears: [
@@ -32,15 +41,24 @@ export const RED_BULL_RB9: VehicleConfig = {
   model: 'red-bull-rb9',
   sound: 'red-bull.wav',
   font: 'seven-segment-regular.typeface.json',
-  info: {
-    color: 0xff0033,
-    position: {x: 0.0058, y: 0.659, z: 0.69},
-    size: 0.016,
+  dashboard: {
+    gear: {
+      color: 0xff0033,
+      position: {x: 0.0058, y: 0.643, z: 0.64},
+      size: 0.015,
+    },
+    speed: {
+      color: 0xff0033,
+      position: {x: -0.0120, y: 0.645, z: 0.64},
+      size: 0.011,
+    },
   },
   pointLocalY: 0,
   settings: {
+    mass: 540,
     rpm: 7000,
-    force: 3200,
+    force: 2400,
+    downforce: 0.77,
     steer: 0.3,
     brake: 1000,
     gears: [
@@ -49,9 +67,9 @@ export const RED_BULL_RB9: VehicleConfig = {
       {gear: 1, ratio: 3.5, speed: 70},
       {gear: 2, ratio: 3, speed: 90},
       {gear: 3, ratio: 2.5, speed: 120},
-      {gear: 4, ratio: 2, speed: 180},
-      {gear: 5, ratio: 1.5, speed: 220},
-      {gear: 6, ratio: 1, speed: 260},
+      {gear: 4, ratio: 2, speed: 150},
+      {gear: 5, ratio: 1.5, speed: 180},
+      {gear: 6, ratio: 1, speed: 220},
     ],
   },
 }
@@ -61,8 +79,10 @@ export const INTERLAGOS: TrackConfig = {
   sound: {
     startLight: 'start-light.wav',
   },
-  spawnHeight: -12,
-  rotate: Math.PI / 2,
+  settings: {
+    airDensity: 1.09,
+    rotate: Math.PI / 2,
+  },
 }
 
 export const SPA: TrackConfig = {
@@ -70,6 +90,9 @@ export const SPA: TrackConfig = {
   sound: {
     startLight: 'start-light.wav',
   },
-  spawnHeight: 0,
-  rotate: Math.PI / 2,
+  settings: {
+    airDensity: 1.112,
+    // height: 0,
+    rotate: Math.PI / 2,
+  },
 }

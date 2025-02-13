@@ -2,6 +2,7 @@ export * from './actions';
 export * from './body-object';
 export * from './camera';
 export * from './controls';
+export * from './follower';
 export * from './partials';
 export * from './parts';
 export * from './renderer';

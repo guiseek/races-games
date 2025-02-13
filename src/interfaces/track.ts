@@ -19,11 +19,15 @@ export interface TrackSoundConfig {
   startLight: string
 }
 
+export interface TrackSettings {
+  airDensity: number
+  rotate: number
+}
+
 export interface TrackConfig {
   model: string
   sound: TrackSoundConfig
-  spawnHeight: number
-  rotate: number
+  settings: TrackSettings
 }
 
 export interface MeshStartLight extends Mesh {

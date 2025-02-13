@@ -2,6 +2,7 @@ import {FontLoader, GLTFLoader} from 'three/examples/jsm/Addons.js'
 import {AudioListener, AudioLoader, TextureLoader} from 'three'
 import {TrackService, VehicleService} from './data-access'
 import {createToken, load, set} from './utils'
+import {Player} from './player'
 import {Stage} from './core'
 
 const APP = createToken<HTMLElement>('app.token')
@@ -44,8 +45,12 @@ export const setup = () => {
         },
       },
       {
+        ref: Player,
+        dep: [],
+      },
+      {
         ref: Stage,
-        dep: [APP, TextureLoader],
+        dep: [APP, TextureLoader, Player],
       }
     )
   )

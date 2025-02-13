@@ -1,6 +1,8 @@
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 import {Updatable} from '../interfaces'
+import {Follower} from './follower'
 import {Renderer} from './renderer'
+import {Player} from '../player'
 import {World} from 'cannon-es'
 import {Camera} from './camera'
 import {
@@ -27,11 +29,20 @@ export class Stage {
 
   stats = new Stats()
 
-  constructor(container: HTMLElement, textureLoader: TextureLoader) {
+  controls: Follower
+
+  constructor(
+    container: HTMLElement,
+    textureLoader: TextureLoader,
+    private player: Player
+  ) {
     this.world.gravity.set(0, -9.81, 0)
-    this.world.defaultContactMaterial.friction = 80
+    this.world.defaultContactMaterial.friction = 280
+    this.world.defaultContactMaterial.restitution = 0
 
     this.renderer = new Renderer(container)
+
+    this.controls = new Follower(this.camera)
 
     textureLoader
       .loadAsync('wasteland_clouds_puresky_4k.jpeg')
@@ -60,12 +71,18 @@ export class Stage {
 
     requestAnimationFrame(this.animate)
 
+    if (this.player.actions.paused) return
+
     const delta = this.clock.getDelta()
 
-    this.world.step(this.timeStep, delta, 30)
+    this.world.step(this.timeStep, delta)
 
     for (const updatable of this.#updatables) {
       updatable.update(delta)
+    }
+
+    if (this.controls.hasTarget) {
+      this.controls.update()
     }
 
     this.renderer.render(this.scene, this.camera)

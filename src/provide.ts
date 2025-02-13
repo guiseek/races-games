@@ -1,10 +1,10 @@
 import {Track, TrackSound, Vehicle, VehicleSound} from './models'
 import {TrackService, VehicleService} from './data-access'
-import {VehicleInfo} from './models/vehicle/vehicle-info'
 import {Audio, AudioListener, AudioLoader} from 'three'
 import {TrackConfig, VehicleConfig} from './interfaces'
 import {FontLoader} from 'three/examples/jsm/Addons.js'
 import {use} from './utils'
+import {VehicleDashboard} from './models/vehicle'
 
 export const provideTrack = async (config: TrackConfig) => {
   const listener = use(AudioListener)
@@ -13,7 +13,7 @@ export const provideTrack = async (config: TrackConfig) => {
 
   const sound = new TrackSound(new Audio(listener).setBuffer(buffer))
 
-  return new Track(gltf, sound, config.spawnHeight, config.rotate)
+  return new Track(gltf, sound, config.settings)
 }
 
 export const provideVehicle = async (config: VehicleConfig) => {
@@ -24,9 +24,7 @@ export const provideVehicle = async (config: VehicleConfig) => {
 
   const sound = new VehicleSound(new Audio(listener).setBuffer(buffer))
 
-  const info = new VehicleInfo(config.info.color, font, config.info.size)
-  info.position.copy(config.info.position)
-  info.rotation.y = -Math.PI
+  const dashboard = new VehicleDashboard(font, config.dashboard)
 
-  return new Vehicle(gltf, sound, info, config.settings)
+  return new Vehicle(gltf, sound, dashboard, config.settings)
 }
