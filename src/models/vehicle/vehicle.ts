@@ -1,0 +1,261 @@
+import {getBoundingSphere, toQuaternion, toTrimesh, toVec3} from '../../utils'
+import {VehiclePart, VehicleSettings} from '../../interfaces'
+import {GLTF} from 'three/examples/jsm/Addons.js'
+import {lerp} from 'three/src/math/MathUtils.js'
+import {VehicleActions} from './vehicle-actions'
+import {Body, RaycastVehicle} from 'cannon-es'
+import {VehicleWheel} from './vehicle-wheel'
+import {Group, Mesh, Object3D} from 'three'
+import {VehicleState} from './vehicle-state'
+import {VehicleSound} from './vehicle-sound'
+import {VehicleInfo} from './vehicle-info'
+import {Parts} from '../../core'
+
+export class Vehicle {
+  parts: Parts<VehiclePart>
+
+  body: Body
+
+  object: Object3D
+
+  raycast: RaycastVehicle
+
+  wheels: VehicleWheel[] = []
+
+  actions: VehicleActions
+
+  state: VehicleState
+
+  steering = {
+    maxAngle: Math.PI / 6,
+    minAngle: Math.PI / 20,
+  }
+
+  steeringWheel: Object3D
+
+  maxSpeed: number
+
+  constructor(
+    {scene}: GLTF,
+    private sound: VehicleSound,
+    private info: VehicleInfo,
+    private settings: VehicleSettings
+  ) {
+    this.parts = new Parts(scene)
+
+    this.actions = new VehicleActions()
+
+    this.body = new Body({mass: 540})
+    this.body.collisionResponse = true
+    this.body.updateMassProperties()
+
+    this.steeringWheel = this.parts.getPart('SteeringWheel')
+
+    const chassisBody = this.parts.getPart<Mesh>('CollisionChassisBody')
+
+    this.body.position.set(
+      chassisBody.position.x,
+      chassisBody.position.y,
+      chassisBody.position.z
+    )
+
+    this.body.quaternion.set(
+      chassisBody.quaternion.x,
+      chassisBody.quaternion.y,
+      chassisBody.quaternion.z,
+      chassisBody.quaternion.w
+    )
+
+    const shape = toTrimesh(chassisBody.geometry)
+    const offset = toVec3(chassisBody.position)
+    const orientation = toQuaternion(chassisBody.quaternion)
+    this.body.addShape(shape, offset, orientation)
+
+    this.raycast = new RaycastVehicle({
+      chassisBody: this.body,
+      indexRightAxis: 0,
+      indexUpAxis: 1,
+      indexForwardAxis: 2,
+    })
+
+    this.object = new Group()
+    this.object.add(
+      this.parts.getPart('ChassisBody'),
+      this.parts.getPart('FrontSuspension'),
+      this.parts.getPart('RearSuspension')
+    )
+
+    this.object.add(this.info)
+
+    this.state = new VehicleState(0, 1, 800)
+
+    this.maxSpeed = this.settings.gears[this.settings.gears.length - 1].speed
+
+    {
+      const collision = this.parts.getPart<Mesh>('CollisionFrontWheelLeft')
+      const wheel = this.parts.getPart('FrontWheelLeft')
+      const radius = collision.geometry.boundingSphere!.radius
+      this.addWheel(collision, wheel, radius * 1.5)
+    }
+
+    {
+      const collision = this.parts.getPart<Mesh>('CollisionFrontWheelRight')
+      const wheel = this.parts.getPart('FrontWheelRight')
+      const radius = collision.geometry.boundingSphere!.radius
+      this.addWheel(collision, wheel, radius * 1.5)
+    }
+
+    {
+      const collision = this.parts.getPart<Mesh>('CollisionRearWheelLeft')
+      const wheel = this.parts.getPart('RearWheelLeft')
+      const radius = collision.geometry.boundingSphere!.radius
+      this.addWheel(collision, wheel, radius * 1.5)
+    }
+
+    {
+      const collision = this.parts.getPart<Mesh>('CollisionRearWheelRight')
+      const wheel = this.parts.getPart('RearWheelRight')
+      const radius = collision.geometry.boundingSphere!.radius
+      this.addWheel(collision, wheel, radius * 1.5)
+    }
+
+    this.listen()
+  }
+
+  update(deltaTime: number) {
+    const steeringSpeed = 1.8 * deltaTime
+    const steeringInput =
+      (this.actions.state.left ? 1 : 0) - (this.actions.state.right ? 1 : 0)
+
+    if (steeringInput === 0) {
+      if (this.state.steering > 0) {
+        this.state.setSteering(Math.max(0, this.state.steering - steeringSpeed))
+      } else if (this.state.steering < 0) {
+        this.state.setSteering(Math.min(0, this.state.steering + steeringSpeed))
+      }
+    } else {
+      this.state.incSteering(steeringInput * steeringSpeed)
+      this.state.setSteering(
+        Math.max(
+          -this.settings.steer,
+          Math.min(this.settings.steer, this.state.steering)
+        )
+      )
+    }
+
+    const speedAvarage =
+      this.raycast.chassisBody.velocity.length() / this.maxSpeed
+
+    const speedFactor = Math.min(1, speedAvarage)
+
+    const steeringAngle = lerp(
+      this.steering.maxAngle,
+      this.steering.minAngle,
+      speedFactor
+    )
+
+    const steering = this.state.steering * steeringAngle * 2.5
+
+    this.steeringWheel.rotation.z = -steering
+
+    const gear = this.settings.gears[this.state.gear]
+
+    const speed = this.raycast.chassisBody.velocity.length()
+
+    this.state.setRPM((speed / gear.speed) * this.settings.rpm)
+
+    if (this.state.rpm > this.settings.rpm) {
+      this.state.setRPM(this.settings.rpm)
+    } else if (this.state.rpm < 1000) {
+      this.state.setRPM(1100)
+    }
+
+    /**
+     * Gears
+     */
+    const currentGear = this.state.gear
+    const maxGear = this.settings.gears.length - 1
+
+    if (this.state.rpm > 6000 && currentGear < maxGear) {
+      this.state.shiftUp()
+    } else if (this.state.rpm < 3000 && currentGear > 1) {
+      this.state.shiftDown()
+    }
+
+    /** Gear on display */
+    this.info.update(this.state.gear)
+
+    /**
+     * Sound
+     */
+    this.sound.update(this.state.rpm)
+
+    /**
+     * Apply steering wheel
+     */
+    this.raycast.setSteeringValue(this.state.steering, 0)
+    this.raycast.setSteeringValue(this.state.steering, 1)
+
+    /**
+     * Vehicle position
+     */
+    this.object.position.copy(this.body.position)
+    this.object.quaternion.copy(this.body.quaternion)
+
+    /**
+     * Wheels state
+     */
+    for (let i = 0; i < this.raycast.wheelInfos.length; i++) {
+      this.raycast.updateWheelTransform(i)
+      const wheel = this.raycast.wheelInfos[i]
+
+      const {position, quaternion} = this.wheels[i].object
+
+      position.copy(wheel.worldTransform.position)
+      quaternion.copy(wheel.worldTransform.quaternion)
+    }
+  }
+
+  protected addWheel(collision: Mesh, object: Object3D, pointLocalY: number) {
+    const {radius} = getBoundingSphere(collision.geometry)
+    const wheel = new VehicleWheel(radius, object, pointLocalY)
+    this.raycast.addWheel(wheel)
+    this.wheels.push(wheel)
+  }
+
+  protected listen() {
+    this.actions.on('up', (state) => {
+      if (state) {
+        this.raycast.applyEngineForce(-this.settings.force, 2)
+        this.raycast.applyEngineForce(-this.settings.force, 3)
+      } else {
+        this.raycast.applyEngineForce(0, 2)
+        this.raycast.applyEngineForce(0, 3)
+      }
+    })
+
+    this.actions.on('down', (state) => {
+      if (state) {
+        this.raycast.applyEngineForce(this.settings.force, 2)
+        this.raycast.applyEngineForce(this.settings.force, 3)
+      } else {
+        this.raycast.applyEngineForce(0, 2)
+        this.raycast.applyEngineForce(0, 3)
+      }
+    })
+
+    this.actions.on('space', (state) => {
+      if (state) {
+        this.raycast.setBrake(this.settings.brake, 0)
+        this.raycast.setBrake(this.settings.brake, 1)
+        this.raycast.setBrake(this.settings.brake, 2)
+        this.raycast.setBrake(this.settings.brake, 3)
+      } else {
+        this.raycast.setBrake(0, 0)
+        this.raycast.setBrake(0, 1)
+        this.raycast.setBrake(0, 2)
+        this.raycast.setBrake(0, 3)
+      }
+    })
+  }
+}

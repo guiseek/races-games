@@ -1,0 +1,23 @@
+{
+  "name": "races-games",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build --base=races-games",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/three": "^0.173.0",
+    "cannon-es-debugger": "^1.0.0",
+    "sass": "^1.84.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.1.0"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "three": "^0.173.0"
+  }
+
+}
