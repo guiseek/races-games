@@ -178,7 +178,7 @@ export class Vehicle {
       speedFactor
     )
 
-    const steering = this.state.steering * steeringAngle * 2.5
+    const steering = this.state.steering * steeringAngle * 5
 
     this.steeringWheel.rotation.z = -steering
 
