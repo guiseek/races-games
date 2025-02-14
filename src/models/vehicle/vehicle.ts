@@ -8,7 +8,7 @@ import {VehicleWheel} from './vehicle-wheel'
 import {Group, Mesh, Object3D} from 'three'
 import {VehicleState} from './vehicle-state'
 import {VehicleSound} from './vehicle-sound'
-import {Parts} from '../../core'
+import {Partials} from '../../core'
 import {
   toVec3,
   getArea,
@@ -19,7 +19,7 @@ import {
 } from '../../utils'
 
 export class Vehicle {
-  parts: Parts<VehiclePart>
+  parts: Partials<VehiclePart>
 
   body: Body
 
@@ -52,7 +52,7 @@ export class Vehicle {
     private dashboard: VehicleDashboard,
     private settings: VehicleSettings
   ) {
-    this.parts = new Parts(scene)
+    this.parts = new Partials(scene)
 
     this.actions = new VehicleActions()
 
@@ -60,11 +60,11 @@ export class Vehicle {
     this.body.collisionResponse = true
     this.body.updateMassProperties()
 
-    this.steeringWheel = this.parts.getPart('SteeringWheel')
+    this.steeringWheel = this.parts.getPartial<Mesh>('SteeringWheel')
 
-    this.chassis = this.parts.getPart<Mesh>('CollisionChassisBody')
+    this.chassis = this.parts.getPartial<Mesh>('CollisionChassisBody')
 
-    const frontWing = this.parts.getPart<Mesh>('CollisionFrontWing')
+    const frontWing = this.parts.getPartial<Mesh>('CollisionFrontWing')
 
     this.frontWingArea = getArea(frontWing)
 
@@ -94,11 +94,13 @@ export class Vehicle {
     })
 
     this.object = new Group()
-    this.object.add(
-      this.parts.getPart('ChassisBody'),
-      this.parts.getPart('FrontSuspension'),
-      this.parts.getPart('RearSuspension')
-    )
+    this.object.add(this.parts.getPartial<Mesh>('ChassisBody'))
+
+    const frontSuspension = this.parts.getPartial('FrontSuspension')
+    if (frontSuspension) this.object.add(frontSuspension)
+
+    const rearSuspension = this.parts.getPartial('RearSuspension')
+    if (rearSuspension) this.object.add(rearSuspension)
 
     this.object.add(this.dashboard.gear, this.dashboard.speed)
 
@@ -107,29 +109,29 @@ export class Vehicle {
     this.maxSpeed = this.settings.gears[this.settings.gears.length - 1].speed
 
     {
-      const collision = this.parts.getPart<Mesh>('CollisionFrontWheelLeft')
-      const wheel = this.parts.getPart('FrontWheelLeft')
+      const collision = this.parts.getPartial<Mesh>('CollisionFrontWheelLeft')
+      const wheel = this.parts.getPartial<Object3D>('FrontWheelLeft')
       const radius = collision.geometry.boundingSphere!.radius
       this.addWheel(collision, wheel, radius * 1.5, true)
     }
 
     {
-      const collision = this.parts.getPart<Mesh>('CollisionFrontWheelRight')
-      const wheel = this.parts.getPart('FrontWheelRight')
+      const collision = this.parts.getPartial<Mesh>('CollisionFrontWheelRight')
+      const wheel = this.parts.getPartial<Object3D>('FrontWheelRight')
       const radius = collision.geometry.boundingSphere!.radius
       this.addWheel(collision, wheel, radius * 1.5, true)
     }
 
     {
-      const collision = this.parts.getPart<Mesh>('CollisionRearWheelLeft')
-      const wheel = this.parts.getPart('RearWheelLeft')
+      const collision = this.parts.getPartial<Mesh>('CollisionRearWheelLeft')
+      const wheel = this.parts.getPartial<Object3D>('RearWheelLeft')
       const radius = collision.geometry.boundingSphere!.radius
       this.addWheel(collision, wheel, radius * 1.5)
     }
 
     {
-      const collision = this.parts.getPart<Mesh>('CollisionRearWheelRight')
-      const wheel = this.parts.getPart('RearWheelRight')
+      const collision = this.parts.getPartial<Mesh>('CollisionRearWheelRight')
+      const wheel = this.parts.getPartial<Object3D>('RearWheelRight')
       const radius = collision.geometry.boundingSphere!.radius
       this.addWheel(collision, wheel, radius * 1.5)
     }
@@ -209,7 +211,7 @@ export class Vehicle {
     {
       this.dashboard.update(
         this.state.gear,
-        Math.max(0, this.raycast.currentVehicleSpeedKmHour)
+        Math.max(0, this.body.velocity.length())
       )
     }
 

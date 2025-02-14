@@ -36,7 +36,7 @@ export class Stage {
     textureLoader: TextureLoader,
     private player: Player
   ) {
-    this.world.gravity.set(0, -9.81, 0)
+    this.world.gravity.set(0, -13.81, 0)
     this.world.defaultContactMaterial.friction = 280
     this.world.defaultContactMaterial.restitution = 0
 
