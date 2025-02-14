@@ -1,5 +1,5 @@
 import {ColorRepresentation, Vector3Like} from 'three'
-import {Direction} from '../types'
+import {Direction} from '../core/types'
 
 export type VehicleAction = Direction | 'space'
 

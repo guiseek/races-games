@@ -1,7 +1,7 @@
-import {Type} from '../../types'
 import {Provider, Ref} from './types'
+import {Type} from '../types'
 import {Token} from './token'
-import {is} from '../is'
+import {is} from './is'
 
 const container = new Map()
 const relations = new Map()

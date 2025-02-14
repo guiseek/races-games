@@ -1,4 +1,4 @@
-import {IntervalCallback} from '../types'
+import {IntervalCallback} from '../core'
 
 export const timeout = (handler: TimerHandler, ms = 1000) => {
   const ref = setTimeout(handler, ms)

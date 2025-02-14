@@ -1,4 +1,4 @@
-import {Abstract, Fn, Type} from '../../types'
+import {Abstract, Fn, Type} from '../types'
 import {Token} from './token'
 
 export type Ref<T> = Abstract<T> | Type<T> | Token<T>

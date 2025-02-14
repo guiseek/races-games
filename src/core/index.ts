@@ -1,3 +1,5 @@
+export * from './di';
+export * from './types';
 export * from './actions';
 export * from './body-object';
 export * from './camera';

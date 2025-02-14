@@ -1,7 +1,6 @@
 import {FontLoader, GLTFLoader} from 'three/examples/jsm/Addons.js'
 import {AudioListener, AudioLoader, TextureLoader} from 'three'
-import {TrackService, VehicleService} from './data-access'
-import {createToken, load, set} from './utils'
+import {createToken, load, set} from './core'
 import {Player} from './player'
 import {Stage} from './core'
 
@@ -19,18 +18,10 @@ export const setup = () => {
         },
       },
       {
-        ref: TrackService,
-        dep: [GLTFLoader],
-      },
-      {
         ref: TextureLoader,
         use() {
           return new TextureLoader().setPath('textures/')
         },
-      },
-      {
-        ref: VehicleService,
-        dep: [GLTFLoader],
       },
       {
         ref: AudioLoader,

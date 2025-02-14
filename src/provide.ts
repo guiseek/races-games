@@ -1,15 +1,14 @@
+import {FontLoader, GLTFLoader} from 'three/examples/jsm/Addons.js'
 import {Track, TrackSound, Vehicle, VehicleSound} from './models'
-import {TrackService, VehicleService} from './data-access'
 import {Audio, AudioListener, AudioLoader} from 'three'
 import {TrackConfig, VehicleConfig} from './interfaces'
-import {FontLoader} from 'three/examples/jsm/Addons.js'
-import {use} from './utils'
 import {VehicleDashboard} from './models/vehicle'
+import {use} from './core'
 
 export const provideTrack = async (config: TrackConfig) => {
-  const listener = use(AudioListener)
+  const gltf = await use(GLTFLoader).loadAsync(`tracks/${config.model}.glb`)
   const buffer = await use(AudioLoader).loadAsync(config.sound.startLight)
-  const gltf = await use(TrackService).load(config.model)
+  const listener = use(AudioListener)
 
   const sound = new TrackSound(new Audio(listener).setBuffer(buffer))
 
@@ -17,7 +16,7 @@ export const provideTrack = async (config: TrackConfig) => {
 }
 
 export const provideVehicle = async (config: VehicleConfig) => {
-  const gltf = await use(VehicleService).load(config.model)
+  const gltf = await use(GLTFLoader).loadAsync(`vehicles/${config.model}.glb`)
   const buffer = await use(AudioLoader).loadAsync(config.sound)
   const font = await use(FontLoader).loadAsync(config.font)
   const listener = use(AudioListener)

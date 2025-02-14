@@ -1,8 +1,8 @@
 import {provideTrack, provideVehicle} from './provide'
 import {RED_BULL_RB9, SPA} from './config'
-import {setup} from './setup'
 import {Stage} from './core'
-import {use} from './utils'
+import {setup} from './setup'
+import {use} from './core'
 import './style.scss'
 
 setup().then(async () => {
@@ -26,8 +26,8 @@ setup().then(async () => {
 
     const vehicle = await provideVehicle(RED_BULL_RB9)
 
-    const {x, y, z} = track.positions[2].position
-    vehicle.body.position.set(x - 5, y, z)
+    const {position} = track.positions[2]
+    vehicle.body.position.set(position.x - 5, position.y, position.z)
     vehicle.body.quaternion.setFromEuler(0, track.settings.rotate, 0)
 
     stage.camera.position.set(0, 0.9, -0.2)
@@ -40,15 +40,6 @@ setup().then(async () => {
     track.addVehicle(vehicle)
 
     stage.addUpdatable(track)
-
-    // stage.controls.setTarget(vehicle.object)
-
-    // vehicle.wheels.forEach(({object}) => {
-    //   stage.scene.add(object)
-    // })
-
-    // stage.scene.add(vehicle.object)
-    // stage.addUpdatable(vehicle)
 
     stage.animate()
 
