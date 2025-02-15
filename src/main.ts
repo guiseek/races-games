@@ -1,5 +1,5 @@
 import {provideTrack, provideVehicle} from './provide'
-import {WROTH, INTERLAGOS} from './config'
+import {MCLAREN_MP4_5, INTERLAGOS} from './config'
 import {Stage} from './core'
 import {setup} from './setup'
 import {use} from './core'
@@ -24,7 +24,7 @@ setup().then(async () => {
   const onInteract = async () => {
     removeEventListener('keydown', onInteract)
 
-    const vehicle = await provideVehicle(WROTH)
+    const vehicle = await provideVehicle(MCLAREN_MP4_5)
 
     const {position} = track.positions[2]
     vehicle.body.position.set(position.x - 5, position.y, position.z)

@@ -10,6 +10,10 @@ import {
   Scene,
   TextureLoader,
   EquirectangularReflectionMapping,
+  PointLight,
+  DirectionalLight,
+  HemisphereLight,
+  SpotLight,
 } from 'three'
 
 export class Stage {
@@ -43,6 +47,12 @@ export class Stage {
     this.renderer = new Renderer(container)
 
     this.controls = new Follower(this.camera)
+
+    const pointLight = new PointLight(0xffffff, 1, 10)
+    const dirLight = new DirectionalLight(0xffffff, 1)
+    const hemiLight = new HemisphereLight(0xffffff, 1)
+    const spotLight = new SpotLight(0xffffff, 1, 10, 1)
+    this.scene.add(pointLight, dirLight, hemiLight, spotLight)
 
     textureLoader
       .loadAsync('wasteland_clouds_puresky_4k.jpeg')

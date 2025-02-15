@@ -1,29 +1,29 @@
 import {TrackConfig, VehicleConfig} from './interfaces'
 
 export const MCLAREN_MP4_5: VehicleConfig = {
-  model: 'mclaren-mp4-5',
-  sound: 'run.wav',
+  model: 'mclaren-mp4',
+  sound: 'red-bull.wav',
   font: 'seven-segment-regular.typeface.json',
   dashboard: {
     gear: {
-      color: 0x181818,
-      position: {x: -0.02, y: 0.7356, z: 0.4},
+      color: 0x666666,
+      position: {x: -0.001, y: 0.787, z: 0.52},
       size: 0.008,
     },
     speed: {
-      color: 0x181818,
-      position: {x: -0.02, y: 0.7356, z: 0.4},
+      color: 0x666666,
+      position: {x: -0.014, y: 0.787, z: 0.52},
       size: 0.008,
     },
   },
-  pointLocalY: 0,
   settings: {
     mass: 640,
-    rpm: 8000,
-    force: 3700,
-    downforce: 0.89,
-    steer: 0.25,
-    brake: 300,
+    rpm: 7000,
+    force: 3600,
+    downforce: 0.5,
+    steer: 0.3,
+    brake: 240,
+    pointLocalY: 0.88,
     gears: [
       {gear: -1, ratio: -2.5, speed: 50},
       {gear: 0, ratio: 1.3, speed: 50},
@@ -33,8 +33,6 @@ export const MCLAREN_MP4_5: VehicleConfig = {
       {gear: 4, ratio: 2, speed: 200},
       {gear: 5, ratio: 1.5, speed: 240},
       {gear: 6, ratio: 1, speed: 270},
-      {gear: 7, ratio: 0.7, speed: 300},
-      {gear: 8, ratio: 0.5, speed: 340},
     ],
   },
 }
@@ -55,7 +53,6 @@ export const RED_BULL_RB9: VehicleConfig = {
       size: 0.011,
     },
   },
-  pointLocalY: 0,
   settings: {
     mass: 540,
     rpm: 7000,
@@ -63,6 +60,7 @@ export const RED_BULL_RB9: VehicleConfig = {
     downforce: 0.77,
     steer: 0.3,
     brake: 1000,
+    pointLocalY: 0,
     gears: [
       {gear: -1, ratio: -2.5, speed: 50},
       {gear: 0, ratio: 0.1, speed: 50},
@@ -92,7 +90,6 @@ export const WROTH: VehicleConfig = {
       size: 0.011,
     },
   },
-  pointLocalY: 0,
   settings: {
     mass: 640,
     rpm: 8000,
@@ -100,6 +97,7 @@ export const WROTH: VehicleConfig = {
     downforce: 1.19,
     steer: 0.4,
     brake: 300,
+    pointLocalY: 0,
     gears: [
       {gear: -1, ratio: -2.5, speed: 50},
       {gear: 0, ratio: 0.7, speed: 70},

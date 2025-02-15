@@ -39,6 +39,8 @@ export class Vehicle {
   }
 
   steeringWheel: Object3D
+  wheelHubLeft?: Object3D
+  wheelHubRight?: Object3D
 
   chassis: Mesh
 
@@ -61,6 +63,9 @@ export class Vehicle {
     this.body.updateMassProperties()
 
     this.steeringWheel = this.parts.getPartial<Mesh>('SteeringWheel')
+
+    this.wheelHubLeft = this.parts.getPartial('FrontSuspensionHubLeft')
+    this.wheelHubRight = this.parts.getPartial('FrontSuspensionHubRight')
 
     this.chassis = this.parts.getPartial<Mesh>('CollisionChassisBody')
 
@@ -112,28 +117,40 @@ export class Vehicle {
       const collision = this.parts.getPartial<Mesh>('CollisionFrontWheelLeft')
       const wheel = this.parts.getPartial<Object3D>('FrontWheelLeft')
       const radius = collision.geometry.boundingSphere!.radius
-      this.addWheel(collision, wheel, radius * 1.5, true)
+      const pointLocalY = settings.pointLocalY
+        ? settings.pointLocalY
+        : radius * 1.5
+      this.addWheel(collision, wheel, pointLocalY, true)
     }
 
     {
       const collision = this.parts.getPartial<Mesh>('CollisionFrontWheelRight')
       const wheel = this.parts.getPartial<Object3D>('FrontWheelRight')
       const radius = collision.geometry.boundingSphere!.radius
-      this.addWheel(collision, wheel, radius * 1.5, true)
+      const pointLocalY = settings.pointLocalY
+        ? settings.pointLocalY
+        : radius * 1.5
+      this.addWheel(collision, wheel, pointLocalY, true)
     }
 
     {
       const collision = this.parts.getPartial<Mesh>('CollisionRearWheelLeft')
       const wheel = this.parts.getPartial<Object3D>('RearWheelLeft')
       const radius = collision.geometry.boundingSphere!.radius
-      this.addWheel(collision, wheel, radius * 1.5)
+      const pointLocalY = settings.pointLocalY
+        ? settings.pointLocalY
+        : radius * 1.5
+      this.addWheel(collision, wheel, pointLocalY)
     }
 
     {
       const collision = this.parts.getPartial<Mesh>('CollisionRearWheelRight')
       const wheel = this.parts.getPartial<Object3D>('RearWheelRight')
       const radius = collision.geometry.boundingSphere!.radius
-      this.addWheel(collision, wheel, radius * 1.5)
+      const pointLocalY = settings.pointLocalY
+        ? settings.pointLocalY
+        : radius * 1.5
+      this.addWheel(collision, wheel, pointLocalY)
     }
 
     this.listen()
@@ -184,6 +201,11 @@ export class Vehicle {
 
     this.steeringWheel.rotation.z = -steering
 
+    if (this.wheelHubLeft && this.wheelHubRight) {
+      this.wheelHubLeft.rotation.y = steering
+      this.wheelHubRight.rotation.y = steering
+    }
+
     const gear = this.settings.gears[this.state.gear]
 
     const speed = this.raycast.chassisBody.velocity.length()
@@ -211,7 +233,7 @@ export class Vehicle {
     {
       this.dashboard.update(
         this.state.gear,
-        Math.max(0, this.body.velocity.length())
+        Math.max(0, this.raycast.currentVehicleSpeedKmHour / 1.9)
       )
     }
 
