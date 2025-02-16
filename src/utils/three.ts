@@ -1,4 +1,4 @@
-import {BufferGeometry, Mesh, Vector3} from 'three'
+import {BufferGeometry, Mesh, Object3D, Vector3} from 'three'
 
 export const getBoundingSphere = (geometry: BufferGeometry) => {
   geometry.computeBoundingSphere()
@@ -33,4 +33,13 @@ export const getArea = (mesh: Mesh) => {
   const height = size.z * mesh.scale.z
 
   return width * height
+}
+
+export const traverseShadow = (object: Object3D) => {
+  object.traverse((child) => {
+    if (child instanceof Mesh) {
+      child.receiveShadow = true
+      child.castShadow = true
+    }
+  })
 }

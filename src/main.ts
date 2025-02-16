@@ -1,39 +1,35 @@
-import {provideTrack, provideVehicle} from './provide'
-import {MCLAREN_MP4_5, INTERLAGOS} from './config'
-import {Stage} from './core'
+import {tracks, vehicles} from './config'
+import {Track, Vehicle} from './models'
 import {setup} from './setup'
+import {Stage} from './core'
 import {use} from './core'
 import './style.scss'
+import {events} from './utils'
 
-setup().then(async () => {
-  const stage = use(Stage)
+const init = () => {
+  const trackConfig = tracks['spa-francoschamps']
+  const vehicleConfig = vehicles['rb20']
 
-  const track = await provideTrack(INTERLAGOS)
+  setup(trackConfig, vehicleConfig).then(async () => {
+    const stage = use(Stage)
 
-  track.bodyObjects.forEach(({object, body}) => {
-    stage.world.addBody(body)
-    stage.scene.add(object)
-  })
+    const track = use(Track)
 
-  stage.scene.add(track.object)
+    const vehicle = use(Vehicle)
 
-  stage.scene.add(track.startLights.object)
-
-  stage.renderer.render(stage.scene, stage.camera)
-
-  const onInteract = async () => {
-    removeEventListener('keydown', onInteract)
-
-    const vehicle = await provideVehicle(MCLAREN_MP4_5)
-
-    const {position} = track.positions[2]
+    /**
+     * Veicle
+     */
+    const {position} = track.positions[5]
     vehicle.body.position.set(position.x - 5, position.y, position.z)
     vehicle.body.quaternion.setFromEuler(0, track.settings.rotate, 0)
 
-    stage.camera.position.set(0, 0.91, -0.26)
-    stage.camera.lookAt(0, 1, 16)
+    stage.operator.camera.position.set(0.02, 1.02, -0.27)
+    stage.operator.camera.lookAt(0, -2, 16)
 
-    vehicle.object.add(stage.camera)
+    vehicle.object.add(stage.operator.camera)
+
+    stage.operator.addPerspective(position, vehicle.body.position)
 
     vehicle.raycast.addToWorld(stage.world)
 
@@ -43,8 +39,22 @@ setup().then(async () => {
 
     stage.animate()
 
-    track.startLights.start()
-  }
+    /**
+     * Track
+     */
+    track.bodyObjects.forEach(({object, body}) => {
+      stage.world.addBody(body)
+      stage.operator.currentScene.add(object)
+    })
 
-  addEventListener('keydown', onInteract)
-})
+    stage.operator.currentScene.add(track.object)
+
+    stage.operator.currentScene.add(track.startLights.object)
+
+    track.startLights.start()
+  })
+
+  off()
+}
+
+const off = events(init, 'click', 'keydown')

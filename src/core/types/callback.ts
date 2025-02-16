@@ -13,3 +13,7 @@ export interface AsyncCallback<T> {
 export interface IntervalCallback {
   (value: number): void
 }
+
+export interface Callback<T> {
+  (value: T): void
+}

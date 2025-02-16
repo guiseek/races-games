@@ -14,6 +14,7 @@ export type TrackPart =
   | 'CollisionObjects'
   | 'Banners'
   | 'StartLights'
+  | 'Tree'
 
 export interface TrackSoundConfig {
   startLight: string
@@ -26,6 +27,7 @@ export interface TrackSettings {
 
 export interface TrackConfig {
   model: string
+  label: string
   sound: TrackSoundConfig
   settings: TrackSettings
 }

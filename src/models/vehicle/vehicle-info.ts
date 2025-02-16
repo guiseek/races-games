@@ -13,6 +13,13 @@ export class VehicleInfo extends Mesh {
     const geometry = new TextGeometry('0', options)
     const material = new MeshBasicMaterial({color})
     super(geometry, material)
+
+    geometry.computeBoundingBox()
+    if (!geometry.boundingBox) {
+      throw `VehicleInfo BoundingBox does not computed`
+    }
+    const {max, min} = geometry.boundingBox
+    this.position.x = -size * (max.x - min.x)
   }
 
   update(value: number | string) {

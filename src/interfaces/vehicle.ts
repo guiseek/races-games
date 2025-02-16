@@ -20,6 +20,7 @@ export type VehiclePart =
   | 'CollisionRearWheelRight'
   | 'RearWheelRight'
   | 'SteeringWheelParent'
+  | 'SteeringWheelDisplay'
   | 'SteeringWheel'
 
 export interface VehicleInfoConfig {
@@ -52,6 +53,7 @@ export interface VehicleDashboardConfig {
 
 export interface VehicleConfig {
   model: string
+  label: string
   sound: string
   font: string
   dashboard: VehicleDashboardConfig

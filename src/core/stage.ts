@@ -1,31 +1,28 @@
 import Stats from 'three/examples/jsm/libs/stats.module.js'
+import {CameraOperator} from './camera-operator'
 import {Updatable} from '../interfaces'
-import {Follower} from './follower'
 import {Renderer} from './renderer'
 import {Player} from '../player'
 import {World} from 'cannon-es'
-import {Camera} from './camera'
 import {
   Clock,
-  Scene,
-  TextureLoader,
-  EquirectangularReflectionMapping,
+  Vector2,
   PointLight,
   DirectionalLight,
-  HemisphereLight,
-  SpotLight,
+  EquirectangularReflectionMapping,
 } from 'three'
+import {
+  EffectComposer,
+  OutputPass,
+  RenderPass,
+  RGBELoader,
+  UnrealBloomPass,
+} from 'three/examples/jsm/Addons.js'
 
 export class Stage {
   world = new World()
 
-  scene = new Scene()
-
   clock = new Clock()
-
-  camera = new Camera()
-
-  renderer: Renderer
 
   timeStep = 1 / 60
 
@@ -33,35 +30,53 @@ export class Stage {
 
   stats = new Stats()
 
-  controls: Follower
-
   constructor(
     container: HTMLElement,
-    textureLoader: TextureLoader,
+    readonly renderer: Renderer,
+    readonly operator: CameraOperator,
+    readonly composer: EffectComposer,
+    rgbeLoader: RGBELoader,
     private player: Player
   ) {
-    this.world.gravity.set(0, -13.81, 0)
+    this.world.gravity.set(0, -9.81, 0)
     this.world.defaultContactMaterial.friction = 280
     this.world.defaultContactMaterial.restitution = 0
 
-    this.renderer = new Renderer(container)
+    const directionalLight = new DirectionalLight(0xffffff, 1)
+    directionalLight.position.set(5, 10, 5)
+    directionalLight.castShadow = true
+    directionalLight.shadow.mapSize.width = 2048
+    directionalLight.shadow.mapSize.height = 2048
+    directionalLight.shadow.camera.near = 0.5
+    directionalLight.shadow.camera.far = 50
 
-    this.controls = new Follower(this.camera)
+    this.operator.currentScene.add(directionalLight)
 
-    const pointLight = new PointLight(0xffffff, 1, 10)
-    const dirLight = new DirectionalLight(0xffffff, 1)
-    const hemiLight = new HemisphereLight(0xffffff, 1)
-    const spotLight = new SpotLight(0xffffff, 1, 10, 1)
-    this.scene.add(pointLight, dirLight, hemiLight, spotLight)
+    const pointLight = new PointLight(0xffaa00, 1, 20)
+    pointLight.position.set(-5, 5, 5)
+    pointLight.castShadow = true
+    this.operator.currentScene.add(pointLight)
 
-    textureLoader
-      .loadAsync('wasteland_clouds_puresky_4k.jpeg')
-      .then((texture) => {
-        texture.mapping = EquirectangularReflectionMapping
-        texture.needsUpdate = true
-        this.scene.background = texture
-        this.scene.environment = texture
-      })
+    const pass = new RenderPass(
+      this.operator.currentScene,
+      this.operator.camera
+    )
+    composer.addPass(pass)
+
+    const resolution = new Vector2(innerWidth, innerHeight)
+    const bloomPass = new UnrealBloomPass(resolution, 1.5, 0.4, 0.85)
+    composer.addPass(bloomPass)
+
+    const outputPass = new OutputPass()
+    composer.addPass(outputPass)
+
+    rgbeLoader.loadAsync('wildflower_field_2k.hdr').then((texture) => {
+      texture.mapping = EquirectangularReflectionMapping
+      operator.currentScene.background = texture
+      operator.currentScene.backgroundIntensity = 0.09
+      operator.currentScene.environment = texture
+      operator.currentScene.environmentIntensity = 0.17
+    })
 
     container.appendChild(this.stats.dom)
 
@@ -85,24 +100,20 @@ export class Stage {
 
     const delta = this.clock.getDelta()
 
-    this.world.step(this.timeStep, delta)
+    this.world.step(this.timeStep)
 
     for (const updatable of this.#updatables) {
       updatable.update(delta)
     }
 
-    if (this.controls.hasTarget) {
-      this.controls.update()
-    }
-
-    this.renderer.render(this.scene, this.camera)
+    this.composer.render(delta)
 
     this.stats.end()
   }
 
   onResize = () => {
-    this.camera.aspect = innerWidth / innerHeight
-    this.camera.updateProjectionMatrix()
-    this.renderer.setSize(innerWidth, innerHeight)
+    this.operator.camera.resize()
+    this.composer.setSize(innerWidth, innerHeight)
+    this.renderer.resize()
   }
 }

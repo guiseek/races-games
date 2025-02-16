@@ -16,6 +16,7 @@ import {
   toQuaternion,
   getBoundingSphere,
   calculateDownforce,
+  traverseShadow,
 } from '../../utils'
 
 export class Vehicle {
@@ -39,6 +40,7 @@ export class Vehicle {
   }
 
   steeringWheel: Object3D
+  steeringWheelDisplay: Object3D
   wheelHubLeft?: Object3D
   wheelHubRight?: Object3D
 
@@ -62,7 +64,10 @@ export class Vehicle {
     this.body.collisionResponse = true
     this.body.updateMassProperties()
 
-    this.steeringWheel = this.parts.getPartial<Mesh>('SteeringWheel')
+    this.steeringWheel = this.parts.getPartial<Mesh>('SteeringWheelParent')
+    this.steeringWheelDisplay = this.parts.getPartial<Mesh>(
+      'SteeringWheelDisplay'
+    )
 
     this.wheelHubLeft = this.parts.getPartial('FrontSuspensionHubLeft')
     this.wheelHubRight = this.parts.getPartial('FrontSuspensionHubRight')
@@ -107,7 +112,8 @@ export class Vehicle {
     const rearSuspension = this.parts.getPartial('RearSuspension')
     if (rearSuspension) this.object.add(rearSuspension)
 
-    this.object.add(this.dashboard.gear, this.dashboard.speed)
+    // this.object.add(this.dashboard.gear, this.dashboard.speed)
+    this.steeringWheelDisplay.add(this.dashboard.gear, this.dashboard.speed)
 
     this.state = new VehicleState(0, 1, 800)
 
@@ -152,6 +158,8 @@ export class Vehicle {
         : radius * 1.5
       this.addWheel(collision, wheel, pointLocalY)
     }
+
+    traverseShadow(this.object)
 
     this.listen()
   }
@@ -202,8 +210,8 @@ export class Vehicle {
     this.steeringWheel.rotation.z = -steering
 
     if (this.wheelHubLeft && this.wheelHubRight) {
-      this.wheelHubLeft.rotation.y = steering
-      this.wheelHubRight.rotation.y = steering
+      this.wheelHubLeft.rotation.y = steering * 0.5
+      this.wheelHubRight.rotation.y = steering * 0.5
     }
 
     const gear = this.settings.gears[this.state.gear]
@@ -214,8 +222,8 @@ export class Vehicle {
 
     if (this.state.rpm > this.settings.rpm) {
       this.state.setRPM(this.settings.rpm)
-    } else if (this.state.rpm < 1000) {
-      this.state.setRPM(1100)
+      // } else if (this.state.rpm < 1000) {
+      //   this.state.setRPM(1000)
     }
 
     /**

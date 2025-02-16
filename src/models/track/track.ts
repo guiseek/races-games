@@ -6,6 +6,7 @@ import {Group, Mesh, Object3D} from 'three'
 import {Vehicle} from '../vehicle/vehicle'
 import {TrackSound} from './track-sound'
 import {Vec3} from 'cannon-es'
+import {traverseShadow} from '../../utils'
 
 export class Track {
   partials: Partials<TrackPart>
@@ -43,6 +44,9 @@ export class Track {
     const track = this.partials.getPartial('Track')
     if (track) this.object.add(track)
 
+    const tree = this.partials.getPartial('Tree')
+    if (tree) this.object.add(tree)
+
     const collisionTrack = this.partials.getPartial('CollisionTrack')
     if (collisionTrack) collisionTrack.traverse(this.handleBodyObject)
 
@@ -69,6 +73,8 @@ export class Track {
       this.positions = positions.children
       this.object.add(positions)
     }
+
+    traverseShadow(this.object)
   }
 
   handleCollisionObject = (child: Object3D) => {
@@ -96,36 +102,16 @@ export class Track {
   update(delta: number) {
     for (const vehicle of this.#vehicles) {
       const downforce = vehicle.determineDownforce(this.settings.airDensity)
-      const velocity = vehicle.body.velocity.length()
+      const velocity = vehicle.raycast.currentVehicleSpeedKmHour
 
-      vehicle.body.applyForce(new Vec3(0, -downforce, 0))
-
-      const downforceFactor = downforce / 10000
       const speedFactor = velocity / 100
-
-      /** Aumenta o atrito */
-      const friction = 4 + downforceFactor + speedFactor
-
-      /** Aumenta a rigidez */
-      const suspensionStiffness = 100 + 50 * downforceFactor
-
-      /** Aumenta o amortecimento */
-      const dampingRelaxation = 2.5 + 0.5 * downforceFactor
-
-      /** Aumenta o amortecimento */
-      const dampingCompression = 4.5 + 0.5 * downforceFactor
-
-      /** Aumenta a força máxima */
-      const maxSuspensionForce = 10000 + 5000 * downforceFactor
+      const downforceFactor = downforce / 10000
 
       for (const wheel of vehicle.wheels) {
-        wheel.frictionSlip = Math.min(friction, 10)
-
-        wheel.suspensionStiffness = suspensionStiffness
-        wheel.dampingRelaxation = dampingRelaxation
-        wheel.dampingCompression = dampingCompression
-        wheel.maxSuspensionForce = maxSuspensionForce
+        wheel.applyDownforce(speedFactor, downforceFactor)
       }
+
+      vehicle.body.applyForce(new Vec3(0, -downforce, 0))
 
       vehicle.update(delta)
     }
