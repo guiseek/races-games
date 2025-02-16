@@ -175,8 +175,10 @@ export class Vehicle {
 
   update(deltaTime: number) {
     const steeringSpeed = 1.8 * deltaTime
-    const steeringInput =
-      (this.actions.state.left ? 1 : 0) - (this.actions.state.right ? 1 : 0)
+    const leftPressed = this.actions.state.left || this.actions.state.a
+    const rightPressed = this.actions.state.right || this.actions.state.d
+
+    const steeringInput = (leftPressed ? 1 : 0) - (rightPressed ? 1 : 0)
 
     if (steeringInput === 0) {
       if (this.state.steering > 0) {
@@ -289,7 +291,7 @@ export class Vehicle {
   }
 
   protected listen() {
-    this.actions.on('up', (state) => {
+    const accelerate = (state: boolean) => {
       if (state) {
         this.raycast.applyEngineForce(-this.settings.force, 2)
         this.raycast.applyEngineForce(-this.settings.force, 3)
@@ -297,9 +299,11 @@ export class Vehicle {
         this.raycast.applyEngineForce(0, 2)
         this.raycast.applyEngineForce(0, 3)
       }
-    })
+    }
 
-    this.actions.on('down', (state) => {
+    this.actions.trigger(accelerate, ['up', 'w'])
+
+    const unaccelerate = (state: boolean) => {
       if (state) {
         this.raycast.applyEngineForce(this.settings.force, 2)
         this.raycast.applyEngineForce(this.settings.force, 3)
@@ -307,7 +311,9 @@ export class Vehicle {
         this.raycast.applyEngineForce(0, 2)
         this.raycast.applyEngineForce(0, 3)
       }
-    })
+    }
+
+    this.actions.trigger(unaccelerate, ['down', 's'])
 
     this.actions.on('space', (state) => {
       if (state) {

@@ -31,6 +31,10 @@ export abstract class Actions<T extends string> {
     }
   }
 
+  trigger(callback: ActionCallback, actions: T[]) {
+    actions.forEach((action) => this.on(action, callback))
+  }
+
   dispose() {
     removeEventListener('keydown', this.#onKeyDown)
     removeEventListener('keyup', this.#onKeyUp)

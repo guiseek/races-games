@@ -7,6 +7,10 @@ export class VehicleActions extends Actions<VehicleAction> {
     right: false,
     down: false,
     left: false,
+    w: false,
+    a: false,
+    s: false,
+    d: false,
     space: false,
   }
 }

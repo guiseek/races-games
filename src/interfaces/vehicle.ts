@@ -1,7 +1,7 @@
 import {ColorRepresentation, Vector3Like} from 'three'
 import {Direction} from '../core/types'
 
-export type VehicleAction = Direction | 'space'
+export type VehicleAction = Direction | 'space' | 'w' | 'a' | 's' | 'd'
 
 export type VehiclePart =
   | 'CollisionChassisBody'
