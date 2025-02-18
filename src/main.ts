@@ -1,10 +1,10 @@
 import {tracks, vehicles} from './config'
 import {Track, Vehicle} from './models'
+import {events} from './utils'
 import {setup} from './setup'
 import {Stage} from './core'
 import {use} from './core'
 import './style.scss'
-import {events} from './utils'
 
 const init = () => {
   const trackConfig = tracks['spa-francoschamps']
@@ -21,7 +21,7 @@ const init = () => {
      * Veicle
      */
     const {position} = track.positions[5]
-    vehicle.body.position.set(position.x - 5, position.y, position.z)
+    vehicle.body.position.set(position.x - 5, position.y + 2, position.z)
     vehicle.body.quaternion.setFromEuler(0, track.settings.rotate, 0)
 
     stage.operator.camera.position.set(0.02, 1.02, -0.27)
@@ -35,9 +35,11 @@ const init = () => {
 
     track.addVehicle(vehicle)
 
-    stage.addUpdatable(track)
+    track.contacts.forEach((contact) => {
+      stage.world.addContactMaterial(contact)
+    })
 
-    stage.animate()
+    stage.addUpdatable(track)
 
     /**
      * Track
@@ -50,6 +52,8 @@ const init = () => {
     stage.operator.currentScene.add(track.object)
 
     stage.operator.currentScene.add(track.startLights.object)
+
+    stage.animate()
 
     track.startLights.start()
   })

@@ -1,13 +1,24 @@
 import {Mesh, MeshPhysicalMaterial, Object3D} from 'three'
+import {Material} from 'cannon-es'
 
 export type TrackPart =
   | 'Ground'
   | 'CollisionGround'
+  | 'asphalt'
+  | 'astroturf'
+  | 'brown_ground'
+  | 'grass_outside'
+  | 'grass_trackside'
+  | 'gravel_runoff'
+  | 'runoff'
   | 'Positions'
   | 'Buildings'
   | 'CollisionBuildings'
   | 'Track'
   | 'CollisionTrack'
+  | 'track'
+  | 'pitlane'
+  | 'curbs'
   | 'Walls'
   | 'CollisionWalls'
   | 'Objects'
@@ -30,6 +41,11 @@ export interface TrackConfig {
   label: string
   sound: TrackSoundConfig
   settings: TrackSettings
+}
+
+export interface TrackMaterial {
+  track: Material
+  ground: Material
 }
 
 export interface MeshStartLight extends Mesh {

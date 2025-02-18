@@ -1,9 +1,9 @@
 import {VehiclePart, VehicleSettings} from '../../interfaces'
+import {Body, Material, RaycastVehicle} from 'cannon-es'
 import {VehicleDashboard} from './vehicle-dashboard'
 import {GLTF} from 'three/examples/jsm/Addons.js'
 import {lerp} from 'three/src/math/MathUtils.js'
 import {VehicleActions} from './vehicle-actions'
-import {Body, RaycastVehicle} from 'cannon-es'
 import {VehicleWheel} from './vehicle-wheel'
 import {Group, Mesh, Object3D} from 'three'
 import {VehicleState} from './vehicle-state'
@@ -44,6 +44,8 @@ export class Vehicle {
   wheelHubLeft?: Object3D
   wheelHubRight?: Object3D
 
+  material: Material
+
   chassis: Mesh
 
   frontWingArea: number
@@ -60,7 +62,9 @@ export class Vehicle {
 
     this.actions = new VehicleActions()
 
-    this.body = new Body({mass: settings.mass})
+    this.material = new Material({friction: 1, restitution: 0.1})
+
+    this.body = new Body({mass: settings.mass, material: this.material})
     this.body.collisionResponse = true
     this.body.updateMassProperties()
 
