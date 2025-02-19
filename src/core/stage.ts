@@ -18,6 +18,7 @@ import {
   RGBELoader,
   UnrealBloomPass,
 } from 'three/examples/jsm/Addons.js'
+import {Replay} from './replay'
 
 export class Stage {
   world = new World()
@@ -30,6 +31,8 @@ export class Stage {
 
   stats = new Stats()
 
+  replay: Replay
+
   constructor(
     container: HTMLElement,
     readonly renderer: Renderer,
@@ -41,6 +44,8 @@ export class Stage {
     this.world.gravity.set(0, -16.81, 0)
     // this.world.defaultContactMaterial.friction = 1
     // this.world.defaultContactMaterial.restitution = 0
+
+    this.replay = new Replay(this.world)
 
     const directionalLight = new DirectionalLight(0xffffff, 1)
     directionalLight.position.set(5, 10, 5)
@@ -90,6 +95,8 @@ export class Stage {
   removeUpdatable(updatable: Updatable) {
     this.#updatables.delete(updatable)
   }
+
+  captureState() {}
 
   animate = () => {
     this.stats.begin()

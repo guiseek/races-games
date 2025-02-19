@@ -1,5 +1,6 @@
 import {tracks, vehicles} from './config'
 import {Track, Vehicle} from './models'
+import {Player} from './player'
 import {events} from './utils'
 import {setup} from './setup'
 import {Stage} from './core'
@@ -14,6 +15,7 @@ const init = () => {
     const stage = use(Stage)
 
     const track = use(Track)
+    const player = use(Player)
 
     const vehicle = use(Vehicle)
 
@@ -55,7 +57,19 @@ const init = () => {
 
     stage.animate()
 
-    track.startLights.start()
+    track.startLights.start().then(() => {
+      console.log('start')
+      player.actions.on('r', (state) => {
+        if (state) {
+          vehicle.reset(
+            position.x - 5,
+            position.y + 2,
+            position.z,
+            track.settings.rotate
+          )
+        }
+      })
+    })
   })
 
   off()

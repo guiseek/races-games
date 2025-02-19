@@ -180,6 +180,16 @@ export class Vehicle {
     )
   }
 
+  reset(x: number, y: number, z: number, rotate: number) {
+    this.body.velocity.set(0, 0, 0)
+    this.body.angularVelocity.set(0, 0, 0)
+    this.body.force.set(0, 0, 0)
+    this.body.torque.set(0, 0, 0)
+
+    this.body.position.set(x, y, z)
+    this.body.quaternion.setFromEuler(0, rotate, 0)
+  }
+
   update(deltaTime: number) {
     const steeringSpeed = 1.2 * deltaTime
     const leftPressed = this.actions.state.left || this.actions.state.a
