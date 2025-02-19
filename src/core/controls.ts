@@ -9,5 +9,6 @@ export class Controls extends OrbitControls {
     this.enableDamping = false
     this.enableRotate = false
     this.enableZoom = false
+    this.maxDistance = 24
   }
 }

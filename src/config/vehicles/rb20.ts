@@ -20,10 +20,10 @@ export const RB20: VehicleConfig = {
   settings: {
     mass: 920,
     rpm: 7000,
-    force: 4800,
+    force: 12000,
     downforce: 0.8,
-    steer: 0.3,
-    brake: 320,
+    steer: 0.2,
+    brake: 420,
     pointLocalY: 0,
     gears: [
       {gear: -1, ratio: -2.5, speed: 50},

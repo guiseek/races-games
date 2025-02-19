@@ -22,7 +22,7 @@ export class CameraOperator {
   }
 
   addPerspective(position: Vector3Like, target: Vector3Like) {
-    this.#currentPerspective = this.#perspectives.push({position, target})
+    this.#perspectives.push({position, target})
   }
 
   switchToPerspective(index: number) {
@@ -63,8 +63,13 @@ export class CameraOperator {
     return this.#perspectives[this.#currentPerspective]
   }
 
-  update() {
-    update()
-    this.controls.update()
+  update(delta: number) {
+    update(delta)
+
+    // this.controls.object.position.copy(this.currentPerspective.position)
+    // this.controls.object.position.y += 16
+    // this.controls.target.copy(this.currentPerspective.target)
+
+    this.controls.update(delta)
   }
 }

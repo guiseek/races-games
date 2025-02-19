@@ -6,5 +6,6 @@ export * from './dom';
 export * from './events';
 export * from './form-data';
 export * from './object';
+export * from './progress';
 export * from './three';
 export * from './timeout';

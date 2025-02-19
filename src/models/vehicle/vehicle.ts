@@ -95,6 +95,9 @@ export class Vehicle {
       this.chassis.quaternion.w
     )
 
+    this.body.angularDamping = 0.9
+    this.body.linearDamping = 0.1
+
     const shape = toTrimesh(this.chassis.geometry)
     const offset = toVec3(this.chassis.position)
     const orientation = toQuaternion(this.chassis.quaternion)
@@ -178,7 +181,7 @@ export class Vehicle {
   }
 
   update(deltaTime: number) {
-    const steeringSpeed = 1.8 * deltaTime
+    const steeringSpeed = 1.2 * deltaTime
     const leftPressed = this.actions.state.left || this.actions.state.a
     const rightPressed = this.actions.state.right || this.actions.state.d
 

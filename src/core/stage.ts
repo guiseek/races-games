@@ -106,6 +106,8 @@ export class Stage {
       updatable.update(delta)
     }
 
+    // this.operator.update(delta)
+
     this.composer.render(delta)
 
     this.stats.end()

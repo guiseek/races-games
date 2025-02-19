@@ -2,3 +2,4 @@
 
 
 declare const app: HTMLDivElement
+declare const loaders: HTMLUListElement
