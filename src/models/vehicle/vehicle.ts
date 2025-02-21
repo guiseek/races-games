@@ -186,12 +186,15 @@ export class Vehicle {
     this.body.force.set(0, 0, 0)
     this.body.torque.set(0, 0, 0)
 
+    this.body.angularDamping = 0.9
+    this.body.linearDamping = 0.1
+
     this.body.position.set(x, y, z)
     this.body.quaternion.setFromEuler(0, rotate, 0)
   }
 
   update(deltaTime: number) {
-    const steeringSpeed = 1.2 * deltaTime
+    const steeringSpeed = 0.9 * deltaTime
     const leftPressed = this.actions.state.left || this.actions.state.a
     const rightPressed = this.actions.state.right || this.actions.state.d
 
