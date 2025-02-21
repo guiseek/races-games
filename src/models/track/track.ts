@@ -58,7 +58,7 @@ export class Track {
 
     const track = this.partials.getPartial('Track')
     if (track) this.object.add(track)
-
+    
     const tree = this.partials.getPartial('Tree')
     if (tree) this.object.add(tree)
 
