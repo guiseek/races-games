@@ -1,19 +1,18 @@
 import {Audio} from 'three'
 
 export class VehicleSound {
-  constructor(private engine: Audio) {
-    this.engine.setLoop(true)
-    this.engine.setVolume(0)
-    this.engine.play()
+  constructor(readonly audio: Audio) {
+    this.audio.setLoop(true)
+    this.audio.setVolume(0)
   }
 
   update(rpm: number) {
     const pitch = 1 + rpm / 6000
 
-    this.engine.setPlaybackRate(pitch)
+    this.audio.setPlaybackRate(pitch)
 
     const volume = 0.5 + (rpm / 6000) * 0.5
 
-    this.engine.setVolume(volume)
+    this.audio.setVolume(volume)
   }
 }

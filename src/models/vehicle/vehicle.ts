@@ -54,7 +54,7 @@ export class Vehicle {
 
   constructor(
     {scene}: GLTF,
-    private sound: VehicleSound,
+    readonly sound: VehicleSound,
     private dashboard: VehicleDashboard,
     private settings: VehicleSettings
   ) {
@@ -167,8 +167,6 @@ export class Vehicle {
     }
 
     traverseShadow(this.object)
-
-    this.listen()
   }
 
   determineDownforce(airDensity: number) {
@@ -310,7 +308,9 @@ export class Vehicle {
     this.wheels.push(wheel)
   }
 
-  protected listen() {
+  attach() {
+    this.sound.audio.play()
+
     const accelerate = (state: boolean) => {
       if (state) {
         this.raycast.applyEngineForce(-this.settings.force, 2)
